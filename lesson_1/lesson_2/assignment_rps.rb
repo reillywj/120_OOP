@@ -1,8 +1,24 @@
 class Player
-  def initialize
+  CHOICES = ['R', 'P', 'S']
+
+  attr_reader :auto
+  attr_accessor :choice
+
+  def initialize(auto_play = false)
+    @auto = auto_play
   end
 
   def choose
+    self.choice = if auto
+                    CHOICES.sample
+                  else
+                    request_choice
+                  end
+  end
+
+  private
+
+  def request_choice
   end
 end
 
@@ -21,6 +37,7 @@ end
 
 class RPSGame
   attr_accessor :human, :computer
+
   def initialize
     @human = Player.new
     @computer = Player.new
