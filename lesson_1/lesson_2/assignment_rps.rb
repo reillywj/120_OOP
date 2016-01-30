@@ -103,16 +103,16 @@ class RPSGame
     when :tie
       puts "It's a tie. You both threw #{human.choice}."
     when :player
-      puts "#{winner_line human, computer} You win!"
+      puts "#{winner_line human, computer}"
     when :computer
-      puts "#{winner_line computer, human} You lose."
+      puts "#{winner_line computer, human}"
     else
       puts "THIS SHOULD NEVER SHOW"
     end
   end
 
   def winner_line(winner, loser)
-    "#{winner.choice.capitalize} beats #{loser.choice}."
+    "#{winner.choice.capitalize} beats #{loser.choice}. #{winner.name.capitalize} wins and #{loser.name.capitalize} loses."
   end
 
   def display_goodbye_message
