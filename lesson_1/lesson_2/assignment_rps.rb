@@ -40,7 +40,7 @@ class Rule
   def self.result(player1, player2)
     if tie? player1, player2
       :tie
-    elsif winner?(player1, player2)
+    elsif winner? player1, player2
       :player
     else
       :computer
