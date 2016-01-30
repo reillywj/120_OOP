@@ -1,10 +1,11 @@
 class Player
   CHOICES = { rock: 'r', paper: 'p', scissors: 's' }
 
-  attr_reader :auto
+  attr_reader :auto, :name
   attr_accessor :choice
 
-  def initialize(auto_play = false)
+  def initialize(name = :computer, auto_play = false)
+    @name = name
     @auto = auto_play
   end
 
@@ -71,8 +72,9 @@ class RPSGame
   attr_accessor :human, :computer
 
   def initialize
-    @human = Player.new
-    @computer = Player.new(true)
+    player_name = get_player_name
+    @human = Player.new(player_name)
+    @computer = Player.new(:computer, true)
   end
 
   def play
@@ -85,7 +87,17 @@ class RPSGame
 
   def display_welcome_message
     system 'clear'
-    puts "Welcome to the notorious game of Rock Paper Scissors".center(90, "-")
+    puts "#{human.name}, welcome to the notorious game of Rock Paper Scissors".center(90, "-")
+  end
+
+  def get_player_name
+    puts "What's your name?"
+    name = gets.chomp
+    if name.length < 3
+      puts "Name must be at least 3 letters long."
+      name = get_player_name
+    end
+    name
   end
 
   def human_choose_move
