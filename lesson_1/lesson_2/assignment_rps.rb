@@ -35,11 +35,6 @@ class Player
   end
 end
 
-class Move
-  def initialize
-  end
-end
-
 class Rule
   def self.result(player1, player2)
     if tie? player1, player2
