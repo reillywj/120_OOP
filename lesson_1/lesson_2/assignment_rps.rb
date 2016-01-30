@@ -47,8 +47,6 @@ class Rule
     end
   end
 
-  private
-
   def self.tie?(player1, player2)
     player1.choice == player2.choice
   end
@@ -72,7 +70,7 @@ class RPSGame
   attr_accessor :human, :computer
 
   def initialize
-    player_name = get_player_name
+    player_name = request_player_name
     @human = Player.new(player_name)
     @computer = Player.new(:computer, true)
   end
@@ -90,12 +88,12 @@ class RPSGame
     puts "#{human.name}, welcome to the notorious game of Rock Paper Scissors".center(90, "-")
   end
 
-  def get_player_name
+  def request_player_name
     puts "What's your name?"
     name = gets.chomp
     if name.length < 3
       puts "Name must be at least 3 letters long."
-      name = get_player_name
+      name = request_player_name
     end
     name
   end
