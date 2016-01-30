@@ -98,14 +98,6 @@ class RPSGame
     name
   end
 
-  def human_choose_move
-    human.choose
-  end
-
-  def computer_choose_move
-    computer.choose
-  end
-
   def display_winner
     case Rule.result(human, computer)
     when :tie
@@ -130,8 +122,8 @@ class RPSGame
 
   def gameplay
     loop do
-      human_choose_move
-      computer_choose_move
+      human.choose
+      computer.choose
       display_winner
       break unless play_again?
     end
