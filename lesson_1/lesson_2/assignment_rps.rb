@@ -1,20 +1,27 @@
 class Player
   CHOICES = { rock: 'r', paper: 'p', scissors: 's' }
-
-  attr_reader :auto, :name
+  attr_reader :name
   attr_accessor :choice
+end
 
-  def initialize(name = :computer, auto_play = false)
-    @name = name
-    @auto = auto_play
+class Human < Player
+  def initialize
+    @name = request_name
   end
 
   def choose
-    self.choice = auto ? CHOICES.keys.sample : request_choice
-    puts "You chose #{choice}." unless auto
+    self.choice = request_choice
   end
 
-  private
+  def request_name
+    puts "What is your name?"
+    answer = gets.chomp
+    if answer.empty?
+      puts "Must provide a name."
+      answer = request_name
+    end
+    answer
+  end
 
   def request_choice
     puts "Rock (R) Paper (P) or Scissors(S)?"
@@ -33,6 +40,16 @@ class Player
 
   def valid?(selection)
     CHOICES.keys.include?(selection.to_sym) || CHOICES.values.include?(selection)
+  end
+end
+
+class Computer < Player
+  def initialize
+    @name = ['R2D2', 'C3PO', 'Chappie', 'Number 5'].sample
+  end
+
+  def choose
+    self.choice = CHOICES.keys.sample
   end
 end
 
@@ -70,9 +87,8 @@ class RPSGame
   attr_accessor :human, :computer
 
   def initialize
-    player_name = request_player_name
-    @human = Player.new(player_name)
-    @computer = Player.new(:computer, true)
+    @human = Human.new
+    @computer = Computer.new
   end
 
   def play
@@ -112,7 +128,7 @@ class RPSGame
   end
 
   def winner_line(winner, loser)
-    "#{winner.choice.capitalize} beats #{loser.choice}. #{winner.name.capitalize} wins and #{loser.name.capitalize} loses."
+    "#{winner.choice.capitalize} beats #{loser.choice}. #{winner.name} wins and #{loser.name} loses."
   end
 
   def display_goodbye_message
