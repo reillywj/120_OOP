@@ -60,12 +60,12 @@ class Rule
   def self.winner?(player1, player2)
     p2_choice = player2.choice
     case player1.choice
-    when :rock && p2_choice == :scissors
-      true
-    when :paper && p2_choice == :rock
-      true
-    when :scissors && p2_choice == :paper
-      true
+    when :rock
+      p2_choice == :scissors
+    when :paper
+      p2_choice == :rock
+    when :scissors
+      p2_choice == :paper
     else
       false
     end
@@ -85,9 +85,7 @@ class RPSGame
 
   def play
     display_welcome_message
-    human_choose_move
-    computer_choose_move
-    display_winner
+    gameplay
     display_goodbye_message
   end
 
@@ -126,6 +124,21 @@ class RPSGame
   def display_goodbye_message
     puts "GAMEOVER".center(90, '-')
     puts "Have a nice day!"
+  end
+
+  def gameplay
+    loop do
+      human_choose_move
+      computer_choose_move
+      display_winner
+      break unless play_again?
+    end
+  end
+
+  def play_again?
+    puts "Would you like to play another round? y or n."
+    answer = gets.chomp.downcase
+    %w(yes y).include? answer
   end
 end
 
