@@ -67,9 +67,6 @@ class Rule
   end
 end
 
-def compare(move1, move2)
-end
-
 class RPSGame
   attr_accessor :human, :computer
 
