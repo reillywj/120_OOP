@@ -122,8 +122,6 @@ class RPSGame
       puts "#{winner_line human, computer}"
     when :computer
       puts "#{winner_line computer, human}"
-    else
-      puts "THIS SHOULD NEVER SHOW"
     end
   end
 
