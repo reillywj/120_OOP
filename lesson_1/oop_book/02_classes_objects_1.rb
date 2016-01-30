@@ -53,4 +53,22 @@ class MyCar
   def self.what_am_i
     "A car"
   end
+
+  def self.gas_mileage(miles, gallons_burned)
+    mpg = miles/ gallons_burned
+    puts "Miles per gallon: #{mpg}"
+    mpg
+  end
 end
+
+accord = MyCar.new(2010, 'red', 'Honda Accord')
+
+question 1, "Add gas_mileage class method"
+MyCar.gas_mileage(450, 16)
+
+question 2, "Override to_s method"
+puts accord
+
+question 3, "What's the error? Given code"
+response "undefined method 'name=' means that when you tried to call the instance method name Ruby could find it in the hierarchal chain."
+response "Fix it by adding a 'name=' method or change attr_reader to attr_accessor/writer."
