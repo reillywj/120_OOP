@@ -58,9 +58,9 @@ class Rule
     if tie? player1, player2
       :tie
     elsif winner? player1, player2
-      :player
+      :player1
     else
-      :computer
+      :player2
     end
   end
 
@@ -118,9 +118,9 @@ class RPSGame
     case Rule.result(human, computer)
     when :tie
       puts "It's a tie. You both threw #{human.choice}."
-    when :player
+    when :player1
       puts "#{winner_line human, computer}"
-    when :computer
+    when :player2
       puts "#{winner_line computer, human}"
     end
   end
