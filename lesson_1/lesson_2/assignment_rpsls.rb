@@ -68,8 +68,22 @@ class Human < Player
 end
 
 class Computer < Player
+  BEST_MOVES = { rock: [:paper, :spock],
+                 paper: [:scissors, :lizard],
+                 scissors: [:rock, :spock],
+                 lizard: [:rock, :scissors],
+                 spock: [:paper, :lizard]}
   def initialize
     @name = %w(R2D2 C3P0 Chappie Sonny Number5).sample
+  end
+
+  def throw_move(history = nil)
+    if history.nil? || history.size < 5
+      super()
+    else
+      opponent_history = history.rounds.map { |round| round[0] }
+      self.move = BEST_MOVES[opponent_history.sample].sample
+    end
   end
 end
 
@@ -101,6 +115,10 @@ class History
 
   def commentary=(str)
     rounds.last << str
+  end
+
+  def size
+    rounds.size
   end
 end
 
@@ -200,7 +218,7 @@ class Game
 
   def throw_moves
     human.throw_move
-    computer.throw_move
+    computer.throw_move history
     history.add_move
   end
 
