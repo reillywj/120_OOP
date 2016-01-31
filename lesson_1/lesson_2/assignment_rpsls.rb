@@ -86,7 +86,7 @@ class History
   def to_s
     str = ''
     rounds.each_with_index do |round, num|
-      str += "#{num + 1}. #{round[0]} :: #{round[1]}\n"
+      str += "#{num + 1}. #{round[0].to_s.center(8)} :: #{round[1].to_s.center(8)} - #{round.last}\n"
     end
     str
   end
@@ -98,6 +98,10 @@ class History
   def empty?
     rounds.empty?
   end
+
+  def commentary=(str)
+    rounds.last << str
+  end
 end
 
 class Scoreboard
@@ -105,13 +109,13 @@ class Scoreboard
   attr_reader :player1, :player2
 
   def initialize(player1, player2)
-    @score = {player1 => 0, player2 => 0}
+    @score = { player1 => 0, player2 => 0 }
     @player1 = player1
     @player2 = player2
   end
 
   def increment(player)
-    self.score[player] += 1
+    score[player] += 1
   end
 
   def max_score
@@ -139,18 +143,37 @@ class Game
     system 'clear'
     @human = Human.new
     @computer = Computer.new
-    @best_of = request_best_of
-    @history = History.new human, computer
-    @scoreboard = Scoreboard.new human, computer
   end
 
   def play
     welcome
-    play_until_overall_winner
+    new_game
     goodbye
   end
 
   private
+
+  def new_game
+    loop do
+      self.best_of = request_best_of
+      self.history = History.new human, computer
+      self.scoreboard = Scoreboard.new human, computer
+      play_until_overall_winner
+      break unless new_game?
+    end
+  end
+
+  def new_game?
+    round_over
+    answer = ''
+    loop do
+      puts "Would you like to play again? (y or n)"
+      answer = gets.chomp.downcase
+      break if %w(y n).include? answer
+      puts "Invalid."
+    end
+    answer == 'y'
+  end
 
   def welcome
     puts "#{human}, let's play #{computer} in Rock Paper Scissors Lizard Spock".center(90, '-')
@@ -169,19 +192,28 @@ class Game
   def play_until_overall_winner
     loop do
       info
-      human.throw_move
-      computer.throw_move
-      history.add_move
-      if winner? human, computer
-        scoreboard.increment human
-      elsif winner? computer, human
-        scoreboard.increment computer
-      else
-        puts "It's a tie!"
-      end
-
+      throw_moves
+      increment_winner
       break unless scoreboard.max_score < best_of
     end
+  end
+
+  def throw_moves
+    human.throw_move
+    computer.throw_move
+    history.add_move
+  end
+
+  def increment_winner
+    adder = 'T'
+    if winner? human, computer
+      scoreboard.increment human
+      adder = 'W'
+    elsif winner? computer, human
+      scoreboard.increment computer
+      adder = 'L'
+    end
+    history.commentary = adder
   end
 
   def winner?(player1, player2)
@@ -207,13 +239,17 @@ class Game
     puts history unless history.empty?
   end
 
-  def goodbye
+  def round_over
     info
     if scoreboard.winning? human
-      puts "You WON!"
+      puts "You WON!".center(50, '-')
     else
-      puts "You LOST!"
+      puts "You LOST!".center(50, '-')
     end
+  end
+
+  def goodbye
+    system 'clear'
     puts "GAMEOVER".center(90, '-')
   end
 end
