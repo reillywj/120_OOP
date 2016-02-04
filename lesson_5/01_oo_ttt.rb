@@ -251,6 +251,15 @@ class Game
     title "#{player1} versus #{player2}"
   end
 
+  def play(player)
+    show_board
+    player.turn(board)
+  end
+
+  def show_board
+    puts board
+  end
+
   def play_again?
     answer = ''
     loop do
@@ -306,15 +315,6 @@ class TicTacToe < Game
   end
 
   private
-
-  def play(player)
-    show_board
-    player.turn(board)
-  end
-
-  def show_board
-    puts board
-  end
 
   def show_winner(position)
     winning_marker = board.squares[position.first - 1].mark
