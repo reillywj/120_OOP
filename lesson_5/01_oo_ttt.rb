@@ -45,7 +45,7 @@ class Player
   end
 
   def turn(board)
-    board.place_piece board.options.sample.to_i, mark
+    board[board.options.sample.to_i] = mark
   end
 end
 
@@ -55,7 +55,7 @@ class Human < Player
 
   def turn(board)
     ask_inline "#{name}, place your piece: "
-    board.place_piece select_position(board).to_i, mark
+    board[select_position(board).to_i] = mark
   end
 
   private
@@ -102,8 +102,12 @@ class Gameboard
     squares.select { |square| square.mark.nil? }.map(&:position)
   end
 
-  def place_piece(position, marker)
+  def []=(position, marker)
     squares[position - 1].mark = marker
+  end
+
+  def [](position)
+    squares[position - 1]
   end
 
   private
