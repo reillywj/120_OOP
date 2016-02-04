@@ -10,8 +10,6 @@
 #   -Players take turns
 # 3. Organize and do exploratory programming
 
-require 'pry'
-
 # Promptable
 module Promptable
   def ask(question)
