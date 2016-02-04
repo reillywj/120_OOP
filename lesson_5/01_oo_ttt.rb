@@ -173,6 +173,8 @@ class Game
   include Promptable
 
   GAME_NAME = 'Generic Game'
+  PLAYER1_MARKER = '>'
+  PLAYER2_MARKER = '<'
 
   attr_accessor :player1, :player2, :board, :turn
   attr_reader :first_game
@@ -214,13 +216,13 @@ class Game
     case number
     when 1
       name? 'your'
-      @player1 = Human.new(request_name, 'X')
-      @player2 = Computer.new('R2D2', 'O')
+      @player1 = Human.new(request_name, self.class::PLAYER1_MARKER)
+      @player2 = Computer.new('R2D2', self.class::PLAYER2_MARKER)
     when 2
       name? "Player 1's"
-      @player1 = Human.new(request_name, 'X')
+      @player1 = Human.new(request_name, self.class::PLAYER1_MARKER)
       name? "Player 2's"
-      @player2 = Human.new(request_name, 'O')
+      @player2 = Human.new(request_name, self.class::PLAYER2_MARKER)
     end
   end
 
@@ -292,6 +294,8 @@ end
 # Classic game of TicTacToe
 class TicTacToe < Game
   GAME_NAME = 'Object Oriented Tic Tac Toe'
+  PLAYER1_MARKER = 'X'
+  PLAYER2_MARKER = 'O'
   WINNING_POSITIONS = [[1, 2, 3],
                        [4, 5, 6],
                        [7, 8, 9],
@@ -321,7 +325,7 @@ class TicTacToe < Game
   private
 
   def show_winner(position)
-    winning_marker = board.squares[position.first - 1].mark
+    winning_marker = board[position.first - 1].mark
     winning_player = case winning_marker
                      when player1.mark
                        player1
