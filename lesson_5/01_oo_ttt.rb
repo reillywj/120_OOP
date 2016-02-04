@@ -9,6 +9,7 @@
 #   -Players have game piece
 #   -Players take turns
 # 3. Organize and do exploratory programming
+# 4. Refactor (over and over again)
 
 # Promptable
 module Promptable
