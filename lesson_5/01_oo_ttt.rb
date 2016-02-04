@@ -25,6 +25,10 @@ module Promptable
   def invalid(msg = 'entry')
     puts "Invalid #{msg}. Try again."
   end
+
+  def clear_screen
+    system 'clear'
+  end
 end
 
 # Generic player defaults to randomly selecting board options
@@ -182,7 +186,7 @@ class Game
   end
 
   def welcome
-    system 'clear'
+    clear_screen
     title "Let's play some #{self.class::GAME_NAME}"
   end
 
@@ -243,7 +247,7 @@ class Game
   end
 
   def player_intro
-    system 'clear'
+    clear_screen
     title "#{player1} versus #{player2}"
   end
 
@@ -265,7 +269,7 @@ class Game
   end
 
   def goodbye
-    system 'clear'
+    clear_screen
     title 'GAMEOVER'
     title "Thank you for playing #{self.class::GAME_NAME}"
     title 'Have a nice day!'
@@ -333,7 +337,7 @@ class TicTacToe < Game
   end
 
   def conclude_match
-    system 'clear'
+    clear_screen
     title 'Match Over'
     winner = winning_position
     if winner
