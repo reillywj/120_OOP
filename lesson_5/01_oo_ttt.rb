@@ -71,7 +71,6 @@ end
 
 # Computer player, available for future features
 class Computer < Player
-
   def turn(board)
     square_options = board.options
     if square_options.include? '5'
@@ -124,9 +123,9 @@ class Gameboard
 
   def winning_squares(marker)
     results = []
-    board_options = options
     TicTacToe::WINNING_POSITIONS.each do |pos_arr|
-      squares_in_question = pos_arr.map {|pos| self[pos]}.reject{|square| square.mark == marker}
+      squares_in_question = pos_arr.map { |pos| self[pos] }
+                            .reject { |square| square.mark == marker }
       if squares_in_question.size == 1 && squares_in_question.first.mark.nil?
         results << squares_in_question.first
       end
@@ -136,9 +135,9 @@ class Gameboard
 
   def losing_squares(marker)
     results = []
-    board_options = options
     TicTacToe::WINNING_POSITIONS.each do |pos_arr|
-      squares_in_question = pos_arr.map {|pos| self[pos]}.reject{|square| square.mark != marker && square.mark}
+      squares_in_question = pos_arr.map { |pos| self[pos] }
+                            .reject { |square| square.mark != marker && square.mark }
       if squares_in_question.size == 1 && squares_in_question.first.mark.nil?
         results << squares_in_question.first
       end
