@@ -10,7 +10,7 @@
 #   -Players take turns
 # 3. Organize and do exploratory programming
 # 4. Refactor (over and over again)
-
+require 'pry'
 # Promptable
 module Promptable
   def ask(question)
@@ -71,6 +71,19 @@ end
 
 # Computer player, available for future features
 class Computer < Player
+
+  def turn(board)
+    square_options = board.options
+    if square_options.include? '5'
+      return board[5] = mark
+    elsif board.winning_squares(mark)
+      return board[board.winning_squares(mark).position.to_i] = mark
+    elsif board.losing_squares(mark)
+      return board[board.losing_squares(mark).position.to_i] = mark
+    else
+      return board[square_options.sample.to_i] = mark
+    end
+  end
 end
 
 # Gameboard holds squares
@@ -107,6 +120,30 @@ class Gameboard
 
   def [](position)
     squares[position - 1]
+  end
+
+  def winning_squares(marker)
+    results = []
+    board_options = options
+    TicTacToe::WINNING_POSITIONS.each do |pos_arr|
+      squares_in_question = pos_arr.map {|pos| self[pos]}.reject{|square| square.mark == marker}
+      if squares_in_question.size == 1 && squares_in_question.first.mark.nil?
+        results << squares_in_question.first
+      end
+    end
+    results.sample
+  end
+
+  def losing_squares(marker)
+    results = []
+    board_options = options
+    TicTacToe::WINNING_POSITIONS.each do |pos_arr|
+      squares_in_question = pos_arr.map {|pos| self[pos]}.reject{|square| square.mark != marker && square.mark}
+      if squares_in_question.size == 1 && squares_in_question.first.mark.nil?
+        results << squares_in_question.first
+      end
+    end
+    results.sample
   end
 
   private
