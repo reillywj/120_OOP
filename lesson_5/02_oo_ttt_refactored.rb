@@ -88,6 +88,7 @@ module Promptable
           possible_answers << "or #{val}"
         end
       end
+      possible_answers
     end
   end
 end
@@ -153,10 +154,12 @@ end
 
 # Computer player
 class Computer < Player
-  def initialize(other_player_marker = nil)
+  def initialize(name = 'R2D2', other_player_marker = nil)
     super()
-    @name = 'R2D2'
-    @marker = %w(o O).include?(other_player_marker) ? 'X' : 'O'
+    @name = name
+    first_init = name[0].upcase
+    arr_to_check = [first_init.downcase, first_init.upcase]
+    @marker = arr_to_check.include?(other_player_marker) ? first_init : 'O'
   end
 
   def take_turn(board)
@@ -309,9 +312,12 @@ class Game
     welcome
     number_of_humans = how_many_humans?.to_i unless player1 && player2
     case number_of_humans
+    when 0
+      @player1 = Computer.new('Alpha Indigo')
+      @player2 = Computer.new('R2D2', @player1.marker)
     when 1
       @player1 = Human.new
-      @player2 = Computer.new(@player1.marker)
+      @player2 = Computer.new('R2D2', @player1.marker)
     when 2
       title 'Player 1'
       @player1 = Human.new
@@ -407,7 +413,7 @@ class Game
   private
 
   def how_many_humans?
-    ask_question? 'How many human players?', %w(1 2)
+    ask_question? 'How many human players?', %w(0 1 2)
   end
 end
 
@@ -454,7 +460,7 @@ class TicTacToe < Game
 
   private
 
-  def show_standard_info(params = {yes_show_board: true})
+  def show_standard_info(params = { yes_show_board: true })
     clear
     game_title
     scoreboard
@@ -478,7 +484,7 @@ class TicTacToe < Game
   end
 
   def show_match_result
-    show_standard_info({yes_show_board: false})
+    show_standard_info(yes_show_board: false)
     title "#{determine_match_winner} #{score_verb} #{determine_match_loser}"
   end
 
