@@ -1,5 +1,6 @@
 require 'pry'
 
+# Promptable module for mixins
 module Promptable
   def clear
     system 'clear'
@@ -43,7 +44,7 @@ module Promptable
       end
 
       if invalid_char == ans
-        msg += "#{' ' unless msg.empty?}Cannot be #{invalid_char}. The other player is that marker."
+        msg += "#{' ' unless msg.empty?}Cannot be #{invalid_char}."
       end
 
       msg.empty? ? nil : msg
@@ -52,7 +53,7 @@ module Promptable
 
   private
 
-  def get_correct_answer(question, &block)
+  def get_correct_answer(question)
     answer = nil
     loop do
       ask question
@@ -64,16 +65,16 @@ module Promptable
     answer
   end
 
-  def string_of_acceptable_answers(arr_of_acceptable_answers)
+  def string_of_acceptable_answers(arr_answers)
     possible_answers = ''
-    case arr_of_acceptable_answers.size
+    case arr_answers.size
     when 1
-      possible_answers = arr_of_acceptable_answers.first
+      possible_answers = arr_answers.first
     when 2
-      possible_answers = "#{arr_of_acceptable_answers.first} or #{arr_of_acceptable_answers.last}"
+      possible_answers = "#{arr_answers.first} or #{arr_answers.last}"
     else
-      arr_of_acceptable_answers.each_with_index do |val, index|
-        if index < arr_of_acceptable_answers.size - 1
+      arr_answers.each_with_index do |val, index|
+        if index < arr_answers.size - 1
           possible_answers << "#{val}, "
         else
           possible_answers << "or #{val}"
@@ -83,6 +84,7 @@ module Promptable
   end
 end
 
+# Player class
 class Player
   attr_reader :name, :marker, :points
 
@@ -107,16 +109,16 @@ class Player
     "#{name}: #{points}"
   end
 
-  def >(other_player)
-    points > other_player.points
+  def >(other)
+    points > other.points
   end
 
-  def <(other_player)
-    points < other_player.points
+  def <(other)
+    points < other.points
   end
 
-  def tied?(other_player)
-    points == other_player.points
+  def tied?(other)
+    points == other.points
   end
 
   def take_turn(board)
@@ -125,16 +127,18 @@ class Player
   end
 end
 
+# Human player class
 class Human < Player
   include Promptable
 
-  def initialize(other_player_marker = nil)
+  def initialize(invalid_marker = nil)
     super()
     @name = ask_question_not_empty? 'What is your name?'
-    @marker = ask_question_single_char? 'Pick a marker. Single character.', other_player_marker
+    @marker = ask_question_single_char? 'Pick a single char as your marker.', invalid_marker
   end
 end
 
+# Computer player
 class Computer < Player
   def initialize(other_player_marker = nil)
     super()
@@ -143,16 +147,17 @@ class Computer < Player
   end
 end
 
+# Tic Tac Toe board setup
 class TTTBoard
   attr_accessor :squares
 
   def initialize
-    @squares = Hash.new
+    @squares = {}
     (1..9).each { |num| @squares[num] = Square.new(num) }
   end
 
   def reset_board
-    squares.each { |square| square.reset }
+    squares.each(&:reset) # { |square| square.reset }
   end
 
   def filled?
@@ -164,18 +169,18 @@ class TTTBoard
   end
 
   def [](position)
-    self.squares[position]
+    squares[position]
   end
 
   def to_s
     breaker = empty_line + line_break + empty_line
     empty_line +
-    line_values(1, 2, 3) +
-    breaker +
-    line_values(4, 5, 6) +
-    breaker +
-    line_values(7, 8, 9) +
-    empty_line
+      line_values(1, 2, 3) +
+      breaker +
+      line_values(4, 5, 6) +
+      breaker +
+      line_values(7, 8, 9) +
+      empty_line
   end
 
   def options
@@ -195,7 +200,7 @@ class TTTBoard
   end
 
   def winning_positions(positions)
-    positions.select{|combo| same?(combo)}
+    positions.select { |combo| same?(combo) }
   end
 
   def winning_marker(positions)
@@ -217,6 +222,7 @@ class TTTBoard
   end
 end
 
+# Square class
 class Square
   attr_reader :position
   attr_accessor :marker
@@ -235,6 +241,7 @@ class Square
   end
 end
 
+# Standard game setup to remove complexities from TicTacToe class.
 class Game
   include Promptable
   GAME_NAME = 'Game'
@@ -272,7 +279,7 @@ class Game
 
   def scoreboard
     scores = "| #{player1.show_score} #{sign} #{player2.show_score} |"
-    line =  ('~' * scores.size).center 100
+    line = ('~' * scores.size).center 100
     puts line
     puts scores.center 100
     puts line
@@ -308,6 +315,7 @@ class Game
   end
 end
 
+# Classic game of Tic Tac Toe
 class TicTacToe < Game
   GAME_NAME = 'Object Oriented Tic Tac Toe'
   WINNING_POSITIONS = [[1, 2, 3],
@@ -376,22 +384,8 @@ class TicTacToe < Game
       player1
     when player2.marker
       player2
-    else
-      nil
     end
   end
 end
 
 TicTacToe.new.start
-
-
-
-
-
-
-
-
-
-
-
-
