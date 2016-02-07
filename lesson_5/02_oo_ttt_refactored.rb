@@ -98,6 +98,11 @@ class Player
     name
   end
 
+  def won
+    @points += 1
+    "#{self} WON"
+  end
+
   def show_score
     "#{name}: #{points}"
   end
@@ -185,6 +190,18 @@ class TTTBoard
     markers.uniq.size == 1 && !markers.first.nil?
   end
 
+  def winner?(positions)
+    !winning_positions(positions).empty?
+  end
+
+  def winning_positions(positions)
+    positions.select{|combo| same?(combo)}
+  end
+
+  def winning_marker(positions)
+    self[winning_positions(positions).first.first].marker
+  end
+
   private
 
   def empty_line
@@ -263,9 +280,9 @@ class Game
 
   def sign
     if player1 > player2
-      '>' * 3
+      '>' * 2
     elsif player1 < player2
-      '<' * 3
+      '<' * 2
     else
       '| |'
     end
@@ -311,36 +328,57 @@ class TicTacToe < Game
 
   def start
     loop do
-      clear
-      game_title
-      scoreboard
-      show_board
+      show_standard_info
       show_turn
       player_to_move.take_turn(board)
       change_turns
       break if board.filled? || winner?
     end
 
-    show_board
+    show_game_result
   end
 
   private
+
+  def show_standard_info
+    clear
+    game_title
+    scoreboard
+    show_board
+  end
 
   def show_board
     puts board
   end
 
+  def show_game_result
+    winning_player = winner
+    msg = if winning_player
+            winning_player.won
+          else
+            'Great game. It was a tie.'
+          end
+    show_standard_info
+    title msg
+  end
+
   def winner?
-    answer = false
-    WINNING_POSITIONS.each do |winning_combo|
-      answer ||= board.same?(winning_combo)
-    end
-    puts 'Winner!' if answer
-    answer
+    board.winner? WINNING_POSITIONS
   end
 
   def winner
-    
+    determine_player(board.winning_marker(WINNING_POSITIONS))
+  end
+
+  def determine_player(marker)
+    case marker
+    when player1.marker
+      player1
+    when player2.marker
+      player2
+    else
+      nil
+    end
   end
 end
 
