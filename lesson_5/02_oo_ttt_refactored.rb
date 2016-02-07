@@ -136,6 +136,11 @@ class Human < Player
     @name = ask_question_not_empty? 'What is your name?'
     @marker = ask_question_single_char? 'Pick a single char as your marker.', invalid_marker
   end
+
+  def take_turn(board)
+    square_num = ask_question?("#{self}, pick a square.", board.options.map(&:to_s)).to_i
+    board[square_num] = marker
+  end
 end
 
 # Computer player
