@@ -51,6 +51,12 @@ module Promptable
     end
   end
 
+  def enter_to_move_on
+    warning 'Press enter to move on.'
+    gets.chomp
+    clear
+  end
+
   private
 
   def get_correct_answer(question)
@@ -161,8 +167,8 @@ class TTTBoard
     (1..9).each { |num| @squares[num] = Square.new(num) }
   end
 
-  def reset_board
-    squares.each(&:reset) # { |square| square.reset }
+  def reset
+    squares.each_value(&:reset) # { |square| square.reset }
   end
 
   def filled?
@@ -255,6 +261,7 @@ end
 class Game
   include Promptable
   GAME_NAME = 'Game'
+  GAME_LIMIT = 5
 
   attr_reader :player1, :player2
   attr_accessor :player_to_move
@@ -318,6 +325,46 @@ class Game
     title "#{player_to_move}'s Turn"
   end
 
+  def max_score
+    player_point_arr.max
+  end
+
+  def min_score
+    player_point_arr.min
+  end
+
+  def score_verb
+    case score_diff
+    when 0
+      'evenly matches'
+    when 1
+      'barely beat'
+    when 2
+      'beat'
+    when 3...self.class::GAME_LIMIT
+      'hammered'
+    when self.class::GAME_LIMIT
+      'totally annihilated'
+    end
+  end
+
+  def player_point_arr
+    [player1.points, player2.points]
+  end
+
+  def score_diff
+    max_score - min_score
+  end
+
+  def game_limit?
+    max_score >= self.class::GAME_LIMIT
+  end
+
+  def gameover
+    title 'GAMEOVER'
+    title "Thank you for playing #{self.class::GAME_NAME}"
+  end
+
   private
 
   def how_many_humans?
@@ -346,6 +393,16 @@ class TicTacToe < Game
 
   def start
     loop do
+      play_one_game
+      break if game_limit?
+      board.reset
+    end
+    show_match_result
+    gameover
+  end
+
+  def play_one_game
+    loop do
       show_standard_info
       show_turn
       player_to_move.take_turn(board)
@@ -358,11 +415,11 @@ class TicTacToe < Game
 
   private
 
-  def show_standard_info
+  def show_standard_info(params = {yes_show_board: true})
     clear
     game_title
     scoreboard
-    show_board
+    show_board if params[:yes_show_board]
   end
 
   def show_board
@@ -378,6 +435,12 @@ class TicTacToe < Game
           end
     show_standard_info
     title msg
+    enter_to_move_on
+  end
+
+  def show_match_result
+    show_standard_info({yes_show_board: false})
+    title "#{determine_match_winner} #{score_verb} #{determine_match_loser}"
   end
 
   def winner?
@@ -394,6 +457,24 @@ class TicTacToe < Game
       player1
     when player2.marker
       player2
+    end
+  end
+
+  def determine_match_winner
+    case max_score
+    when player1.points
+      player1
+    when player2.points
+      player2
+    end
+  end
+
+  def determine_match_loser
+    case determine_match_winner
+    when player1
+      player2
+    when player2
+      player1
     end
   end
 end
