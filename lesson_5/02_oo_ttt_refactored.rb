@@ -2,12 +2,14 @@ require 'pry'
 
 # Promptable module for mixins
 module Promptable
+  SCREEN_SIZE = 100
+
   def clear
     system 'clear'
   end
 
   def title(msg)
-    puts msg.center 100, '-'
+    puts msg.center SCREEN_SIZE, '-'
   end
 
   def ask(question)
@@ -15,7 +17,7 @@ module Promptable
   end
 
   def warning(msg)
-    puts msg.center 100, '!*-*'
+    puts msg.center SCREEN_SIZE, '!*-*'
   end
 
   def ask_question?(question, arr_options)
@@ -128,8 +130,8 @@ class Player
   end
 
   def take_turn(board)
-    square_num = board.options.sample
-    board[square_num] = marker
+    options = board.options
+    board[options.sample] = marker
   end
 end
 
@@ -155,6 +157,19 @@ class Computer < Player
     super()
     @name = 'R2D2'
     @marker = %w(o O).include?(other_player_marker) ? 'X' : 'O'
+  end
+
+  def take_turn(board)
+    options = board.options
+    if options.include? 5
+      board[5] = marker
+    elsif board.next_move_wins(marker)
+      board[board.next_move_wins(marker).position] = marker
+    elsif board.next_move_blocks(marker)
+      board[board.next_move_blocks(marker).position] = marker
+    else
+      board[options.sample] = marker
+    end
   end
 end
 
@@ -221,6 +236,30 @@ class TTTBoard
     else
       self[win_pos.first.first].marker
     end
+  end
+
+  def next_move_wins(marker)
+    results = []
+    TicTacToe::WINNING_POSITIONS.each do |pos_arr|
+      squares_in_question = pos_arr.map { |pos| self[pos] }
+                            .reject { |square| square.marker == marker }
+      if squares_in_question.size == 1 && squares_in_question.first.marker.nil?
+        results << squares_in_question.first
+      end
+    end
+    results.sample
+  end
+
+  def next_move_blocks(marker)
+    results = []
+    TicTacToe::WINNING_POSITIONS.each do |pos_arr|
+      squares_in_question = pos_arr.map { |pos| self[pos] }
+                            .reject { |square| square.marker != marker && square.marker }
+      if squares_in_question.size == 1 && squares_in_question.first.marker.nil?
+        results << squares_in_question.first
+      end
+    end
+    results.sample
   end
 
   private
