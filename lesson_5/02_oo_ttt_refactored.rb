@@ -159,7 +159,7 @@ class Computer < Player
     @name = name
     first_init = name[0].upcase
     arr_to_check = [first_init.downcase, first_init.upcase]
-    @marker = arr_to_check.include?(other_player_marker) ? first_init : 'O'
+    @marker = arr_to_check.include?(other_player_marker) ? 'O' : first_init
   end
 
   def take_turn(board)
