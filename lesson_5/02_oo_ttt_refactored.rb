@@ -79,6 +79,21 @@ class Player
   def show_score
     "#{name}: #{points}"
   end
+
+  def >(other_player)
+    points > other_player.points
+  end
+
+  def <(other_player)
+    points < other_player.points
+  end
+
+  def tied?(other_player)
+    points == other_player.points
+  end
+
+  def take_turn(board)
+  end
 end
 
 class Human < Player
@@ -92,6 +107,7 @@ end
 
 class Computer < Player
   def initialize
+    super
     @name = 'R2D2'
   end
 end
@@ -107,6 +123,43 @@ class TTTBoard
   def reset_board
     squares.each { |square| square.reset }
   end
+
+  def filled?
+
+  end
+
+  def []=(position, marker)
+    self[position].marker = marker
+  end
+
+  def [](position)
+    self.squares[position]
+  end
+
+  def to_s
+    breaker = empty_line + line_break + empty_line
+    empty_line +
+    line_values(1, 2, 3) +
+    breaker +
+    line_values(4, 5, 6) +
+    breaker +
+    line_values(7, 8, 9) +
+    empty_line
+  end
+
+  private
+
+  def empty_line
+    ('   |' * 2) + "   \n"
+  end
+
+  def line_break
+    ('---+' * 2) + ('-' * 3) + "\n"
+  end
+
+  def line_values(pos1, pos2, pos3)
+    " #{self[pos1]} | #{self[pos2]} | #{self[pos3]} \n"
+  end
 end
 
 class Square
@@ -120,6 +173,11 @@ class Square
   def reset
     self.marker = nil
   end
+
+  def to_s
+    value = marker ? marker : position
+    value.to_s
+  end
 end
 
 class Game
@@ -127,6 +185,7 @@ class Game
   GAME_NAME = 'Game'
 
   attr_reader :player1, :player2
+  attr_accessor :player_to_move
 
   def initialize(player1 = nil, player2 = nil)
     welcome
@@ -141,6 +200,8 @@ class Game
       title 'Player 2'
       @player2 = Human.new
     end
+
+    @player_to_move = self.player1
   end
 
   def welcome
@@ -149,8 +210,36 @@ class Game
     title "Let's get ready to play"
   end
 
+  def game_title
+    clear
+    title self.class::GAME_NAME
+  end
+
   def scoreboard
-    "#{player1.show_score} Versus #{player2.show_score}"
+    scores = "| #{player1.show_score} #{sign} #{player2.show_score} |"
+    line =  ('~' * scores.size).center 100
+    puts line
+    puts scores.center 100
+    puts line
+  end
+
+  def sign
+    if player1 > player2
+      '>' * 3
+    elsif player1 < player2
+      '<' * 3
+    else
+      '| |'
+    end
+  end
+
+  def change_turns
+    case player_to_move
+    when player1
+      self.player_to_move = player2
+    when player2
+      self.player_to_move = player1
+    end
   end
 
   private
@@ -171,8 +260,22 @@ class TicTacToe < Game
   end
 
   def start
-    clear
-    scoreboard
+    loop do
+      clear
+      game_title
+      scoreboard
+      show_board
+      player_to_move.take_turn(board)
+      change_turns
+      # break if board.filled? || winner?
+      break
+    end
+  end
+
+  private
+
+  def show_board
+    puts board
   end
 end
 
