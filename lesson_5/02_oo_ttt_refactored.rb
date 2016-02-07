@@ -209,7 +209,12 @@ class TTTBoard
   end
 
   def winning_marker(positions)
-    self[winning_positions(positions).first.first].marker
+    win_pos = winning_positions(positions)
+    if win_pos.empty?
+      nil
+    else
+      self[win_pos.first.first].marker
+    end
   end
 
   private
