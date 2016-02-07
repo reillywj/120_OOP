@@ -43,7 +43,7 @@ module Promptable
       end
 
       if invalid_char == ans
-        msg += "#{' unless msg.empty?'}Cannot be #{invalid_char}. The other player is that marker."
+        msg += "#{' ' unless msg.empty?}Cannot be #{invalid_char}. The other player is that marker."
       end
 
       msg.empty? ? nil : msg
@@ -223,12 +223,12 @@ class Game
     case number_of_humans
     when 1
       @player1 = Human.new
-      @player2 = Computer.new
+      @player2 = Computer.new(@player1.marker)
     when 2
       title 'Player 1'
       @player1 = Human.new
       title 'Player 2'
-      @player2 = Human.new
+      @player2 = Human.new(@player1.marker)
     end
 
     @player_to_move = self.player1
