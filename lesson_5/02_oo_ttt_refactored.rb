@@ -19,28 +19,50 @@ module Promptable
 
   def ask_question?(question, arr_options)
     answer_options = string_of_acceptable_answers(arr_options)
-    ask "#{question} #{answer_options}"
-    answer = nil
-    loop do
-      answer = gets.chomp
-      break if arr_options.include? answer
-      warning "Invalid entry. Try again. #{answer_options}"
+    full_question = "#{question} #{answer_options}"
+    get_correct_answer(full_question) do |ans|
+      'Invalid entry. Try again.' unless arr_options.include? ans
     end
-    answer
   end
 
   def ask_question_not_empty?(question)
-    ask question
-    answer = nil
-    loop do
-      answer = gets.chomp
-      break unless answer.empty?
-      warning 'Cannot be blank.'
+    get_correct_answer(question) { |ans| 'Cannot be empty.' if ans.empty? }
+  end
+
+  def ask_question_single_char?(question, invalid_char)
+    get_correct_answer(question) do |ans|
+      msg = ''
+      if ans.empty?
+        msg += 'Cannot be empty.'
+      elsif ans.size != 1
+        msg += 'Must be single character.'
+      end
+
+      if ans == ans.to_i.to_s
+        msg += "#{' ' unless msg.empty?}Cannot be a number."
+      end
+
+      if invalid_char == ans
+        msg += "#{' unless msg.empty?'}Cannot be #{invalid_char}. The other player is that marker."
+      end
+
+      msg.empty? ? nil : msg
     end
-    answer
   end
 
   private
+
+  def get_correct_answer(question, &block)
+    answer = nil
+    loop do
+      ask question
+      answer = gets.chomp
+      error_message = yield answer
+      break unless error_message
+      warning error_message
+    end
+    answer
+  end
 
   def string_of_acceptable_answers(arr_of_acceptable_answers)
     possible_answers = ''
@@ -93,22 +115,26 @@ class Player
   end
 
   def take_turn(board)
+    square_num = board.options.sample
+    board[square_num] = marker
   end
 end
 
 class Human < Player
   include Promptable
 
-  def initialize
-    super
+  def initialize(other_player_marker = nil)
+    super()
     @name = ask_question_not_empty? 'What is your name?'
+    @marker = ask_question_single_char? 'Pick a marker. Single character.', other_player_marker
   end
 end
 
 class Computer < Player
-  def initialize
-    super
+  def initialize(other_player_marker = nil)
+    super()
     @name = 'R2D2'
+    @marker = %w(o O).include?(other_player_marker) ? 'X' : 'O'
   end
 end
 
@@ -145,6 +171,10 @@ class TTTBoard
     breaker +
     line_values(7, 8, 9) +
     empty_line
+  end
+
+  def options
+    squares.select { |_, square| square.marker }.keys
   end
 
   private
@@ -242,6 +272,10 @@ class Game
     end
   end
 
+  def show_turn
+    title "#{player_to_move}'s Turn"
+  end
+
   private
 
   def how_many_humans?
@@ -265,6 +299,7 @@ class TicTacToe < Game
       game_title
       scoreboard
       show_board
+      show_turn
       player_to_move.take_turn(board)
       change_turns
       # break if board.filled? || winner?
