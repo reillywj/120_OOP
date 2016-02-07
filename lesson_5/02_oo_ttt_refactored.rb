@@ -151,7 +151,7 @@ class TTTBoard
   end
 
   def filled?
-
+    options.empty?
   end
 
   def []=(position, marker)
@@ -174,7 +174,15 @@ class TTTBoard
   end
 
   def options
-    squares.select { |_, square| square.marker }.keys
+    squares.reject { |_, square| square.marker }.keys
+  end
+
+  def same?(pos_arr)
+    markers = []
+    pos_arr.each do |pos|
+      markers << self[pos].marker
+    end
+    markers.uniq.size == 1 && !markers.first.nil?
   end
 
   private
@@ -285,6 +293,14 @@ end
 
 class TicTacToe < Game
   GAME_NAME = 'Object Oriented Tic Tac Toe'
+  WINNING_POSITIONS = [[1, 2, 3],
+                       [4, 5, 6],
+                       [7, 8, 9],
+                       [1, 4, 7],
+                       [2, 5, 8],
+                       [3, 6, 9],
+                       [1, 5, 9],
+                       [3, 5, 7]]
 
   attr_accessor :board
 
@@ -302,15 +318,29 @@ class TicTacToe < Game
       show_turn
       player_to_move.take_turn(board)
       change_turns
-      # break if board.filled? || winner?
-      break
+      break if board.filled? || winner?
     end
+
+    show_board
   end
 
   private
 
   def show_board
     puts board
+  end
+
+  def winner?
+    answer = false
+    WINNING_POSITIONS.each do |winning_combo|
+      answer ||= board.same?(winning_combo)
+    end
+    puts 'Winner!' if answer
+    answer
+  end
+
+  def winner
+    
   end
 end
 
