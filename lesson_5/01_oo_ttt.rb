@@ -32,19 +32,28 @@ end
 
 # Generic player defaults to randomly selecting board options
 class Player
-  attr_reader :mark, :name
+  attr_reader :mark, :name, :points
 
   def initialize(name, mark)
     @name = name
     @mark = GameMarker.new(mark)
+    @points = 0
   end
 
   def to_s
-    "#{name} (#{mark}s)"
+    name
   end
 
   def turn(board)
     board[board.options.sample.to_i] = mark
+  end
+
+  def won
+    @points += 1
+  end
+
+  def reset_score
+    @points = 0
   end
 end
 
@@ -232,8 +241,8 @@ class Game
   end
 
   def player_setup
-    number = ask_number_of_players if first_game
-    ask_name(number) if first_game
+    number = ask_number_of_players
+    ask_name(number)
     reset_turn
   end
 
@@ -289,7 +298,11 @@ class Game
 
   def player_intro
     clear_screen
-    title "#{player1} versus #{player2}"
+    show_score
+  end
+
+  def show_score
+    title "#{player1}: #{player1.points} v. #{player2}: #{player2.points}"
   end
 
   def play(player)
@@ -301,10 +314,20 @@ class Game
     puts board
   end
 
+  def conclude_match
+    clear_screen
+    title 'Match Over'
+    show_score
+  end
+
+  def next_game
+    self.class.new(player1, player2).start
+  end
+
   def play_again?
     answer = ''
     loop do
-      ask "Would you like to play your opponent again in #{GAME_NAME}? y or n"
+      ask "Would you like to play your opponent again in #{self.class::GAME_NAME}? y or n"
       answer = gets.chomp.downcase
       break if %(y n).include? answer
       invalid 'selection'
@@ -312,11 +335,16 @@ class Game
 
     case answer
     when 'y'
+      reset_player_scores
       self.class.new(player1, player2).start
     when 'n'
       goodbye
     end
   end
+
+  def reset_player_scores
+    [player1, player2].each { |player| player.reset_score }
+  end  
 
   def goodbye
     clear_screen
@@ -329,6 +357,7 @@ end
 # Classic game of TicTacToe
 class TicTacToe < Game
   GAME_NAME = 'Object Oriented Tic Tac Toe'
+  GAME_LIMIT = 5
   PLAYER1_MARKER = 'X'
   PLAYER2_MARKER = 'O'
   WINNING_POSITIONS = [[1, 2, 3],
@@ -347,11 +376,16 @@ class TicTacToe < Game
 
   def start
     welcome
-    player_setup
+    player_setup if first_game
     until board.filled? || winning_position
       player_intro
       play(turn)
       change_turns
+    end
+    conclude_game
+    loop do
+      next_game
+      break if best_of_limit?
     end
     conclude_match
     play_again?
@@ -359,16 +393,20 @@ class TicTacToe < Game
 
   private
 
-  def show_winner(position)
-    winning_marker = board[position.first - 1].mark
-    winning_player = case winning_marker
-                     when player1.mark
-                       player1
-                     when player2.mark
-                       player2
-                     end
+  def show_winner(player)
+    title "#{player} WON"
+  end
 
-    title "#{winning_player} WON"
+  def game_winner(position)
+    winning_marker = board[position.first].mark
+    case winning_marker
+    when player1.mark
+     player1.won
+     return player1
+    when player2.mark
+     player2.won
+     return player2
+    end
   end
 
   def winning_position
@@ -379,16 +417,36 @@ class TicTacToe < Game
     winning_position.empty? ? nil : winning_position
   end
 
-  def conclude_match
+  def conclude_game
     clear_screen
-    title 'Match Over'
-    winner = winning_position
-    if winner
-      show_winner(winner)
+    title 'Game Over'
+    show_board
+    if winning_position
+      show_winner game_winner(winning_position)
     else
       puts 'Tie game.'
     end
-    show_board
+    show_score
+    if best_of_limit?
+      title 'Match limit hit. Press enter for next steps.'
+    else
+      ask "Press enter for next game." unless best_of_limit?
+    end
+    gets.chomp
+  end
+
+  def best_of_limit?
+    [player1.points, player2.points].include? GAME_LIMIT
+  end
+
+  def best_of_winner
+    return nil unless best_of_limit?
+
+    if player1.points == GAME_LIMIT
+      player1
+    else
+      player2
+    end
   end
 end
 
