@@ -41,6 +41,7 @@
 # ---------------------
 require 'pry'
 
+# Used in classes that prompts user in terminal
 module Promptable
   SCREEN_SIZE = 90
 
@@ -83,9 +84,8 @@ module Promptable
   def ask_question_numeric_response(question)
     get_correct_answer(question) do |answer|
       msg = ''
-      if answer.empty?
-        msg += 'Cannot be empty.'
-      end
+
+      msg += 'Cannot be empty.' if answer.empty?
 
       if answer != answer.to_i.to_s
         msg += warning_msg(msg, 'Must be a number.')
@@ -122,6 +122,7 @@ module Promptable
   end
 end
 
+# Card player behavior in a module
 module CardPlayer
   def show
     "#{self} has #{hand} totaling #{hand.total}"
@@ -132,9 +133,7 @@ module CardPlayer
   end
 
   def busted?
-    if hand.busted?
-      @status = :busted
-    end
+    @status = :busted if hand.busted?
   end
 
   def show_one_card
@@ -154,6 +153,7 @@ module CardPlayer
   end
 end
 
+# Player class has generic player stuff
 class Player
   attr_reader :name, :hand, :status
   include CardPlayer
@@ -168,6 +168,7 @@ class Player
   end
 end
 
+# Human player
 class Human < Player
   include Promptable
   @@count = 0
@@ -207,11 +208,12 @@ class Human < Player
     end
   end
 
-  def compare_scores(dealer)
-    "#{self}: #{total} v. #{dealer}: #{dealer.total}"
+  def compare_scores(other_player)
+    "#{self}: #{total} v. #{other_player}: #{other_player.total}"
   end
 end
 
+# Dealer has hold of a deck of cards and deals them as requested
 class Dealer < Player
   attr_reader :deck
   STAY_LIMIT = 17
@@ -223,17 +225,14 @@ class Dealer < Player
   end
 
   def deal_to(player)
+    puts "dealing card to #{player}..."
+    sleep 0.5
     player.hand << deck.deal_card
   end
 
   def turn(players)
     @status = within_limit? ? :hit : :stay
     @status = all_players_busted?(players) ? :stay : @status
-    unless stay?
-      sleep 1
-      puts 'dealing...'
-      sleep 1
-    end
   end
 
   def within_limit?
@@ -249,10 +248,14 @@ class Dealer < Player
 
   def all_players_busted?(players)
     statuses = players.map(&:status)
-    statuses.count(:bust) == players.size
+    staying = statuses.count(:busted) == players.size
+    puts "All players busted. Dealer stays." if staying
+    puts "Dealer will #{status}" unless staying
+    staying
   end
 end
 
+# Hand holds info about a CardPlayers Hand of cards
 class Hand
   attr_reader :player, :cards
   GAME_SCORE = 21
@@ -328,6 +331,7 @@ class Hand
   end
 end
 
+# Card class holds info on card
 class Card
   attr_reader :face, :suit
 
@@ -341,10 +345,11 @@ class Card
   end
 
   def show_blank
-    "? of ?"
+    '? of ?'
   end
 end
 
+# Deck class holds info on a deck of cards
 class Deck
   FACES = %w(A K Q J 10 9 8 7 6 5 4 3 2)
   SUITS = %w(H D S C)
@@ -377,6 +382,7 @@ class Deck
   end
 end
 
+# Game procedures for 21
 class Game
   include Promptable
   attr_reader :dealer, :players
@@ -504,43 +510,3 @@ class Game
 end
 
 Game.new.start
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
