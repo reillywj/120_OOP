@@ -1,8 +1,11 @@
-# Twenty-One is a card game between a player and a dealer, which utilizes the use of multiples of the standard 52 card deck. The winner is the one closest to 21 without going over.
+# Twenty-One is a card game between a player and a dealer
+# which utilizes the use of multiples of the standard 52 card deck.
+# The winner is the one closest to 21 without going over.
 # ---------------------
 # Game Procedures
 # - player places bet
-# - 2 cards are dealt to each player/dealer, only one of the dealer's cards is known
+# - 2 cards are dealt to each player/dealer
+  # - only one of the dealer's cards is known
 # - Each player is asked to hit/stay
 #   - if hit, gets another card, repeat until stay or breaks
 #   - if stay move to next player
@@ -77,7 +80,7 @@ module Promptable
 
   def ask_question(question, valid_arr)
     get_correct_answer(question) do |ans|
-      'Invalid entry. Try again.' unless valid_arr.include?(ans.downcase! || ans)
+      'Invalid entry.' unless valid_arr.include?(ans.downcase! || ans)
     end
   end
 
@@ -249,7 +252,7 @@ class Dealer < Player
   def all_players_busted?(players)
     statuses = players.map(&:status)
     staying = statuses.count(:busted) == players.size
-    puts "All players busted. Dealer stays." if staying
+    puts 'All players busted. Dealer stays.' if staying
     puts "Dealer will #{status}" unless staying
     staying
   end
@@ -341,7 +344,27 @@ class Card
   end
 
   def show
-    "#{face} of #{suit}"
+    "#{translate_face} of #{translate_suit}"
+  end
+
+  def translate_face
+    case face
+    when 'A' then 'Ace'
+    when 'K' then 'King'
+    when 'Q' then 'Queen'
+    when 'J' then 'Jack'
+    else
+      face
+    end
+  end
+
+  def translate_suit
+    case suit
+    when 'S' then 'Spades'
+    when 'D' then 'Diamonds'
+    when 'C' then 'Clubs'
+    when 'H' then 'Hearts'
+    end
   end
 
   def show_blank
@@ -370,7 +393,7 @@ class Deck
     DECK_COUNT.times do
       FACES.each do |face|
         SUITS.each do |suit|
-          @cards << Card.new(face, suit)
+          cards << Card.new(face, suit)
         end
       end
     end
@@ -378,7 +401,7 @@ class Deck
   end
 
   def deal_card
-    @cards.pop
+    cards.pop
   end
 end
 
